@@ -98,7 +98,7 @@ let globalSettings: ReminderSettings = defaultSettings;
 // Cache the settings of all open documents
 const documentSettings: Map<string, Thenable<ReminderSettings>> = new Map();
 
-connection.onDidChangeConfiguration(change => {
+connection.onDidChangeConfiguration(async (change) => {
 	if (clientCapabilityConfig.hasConfigurationCapability) {
 		// Reset all cached document settings
 		documentSettings.clear();
@@ -109,6 +109,7 @@ connection.onDidChangeConfiguration(change => {
 	}
 
 	// Revalidate all open text documents
+	await initReminder();
 	documents.all().forEach(validateTextDocument);
 });
 
@@ -161,6 +162,7 @@ async function initReminder() {
 	if (sourceFile.length === 0) {
 		// TODO: provides
 		console.log("provide");
+
 		console.log(connection);
 		console.log(connection.window.showErrorMessage('Please provide source file in settings!'));
 		return;
