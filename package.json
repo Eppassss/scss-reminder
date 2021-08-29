@@ -34,7 +34,7 @@
 				"languageServerReminder.sourceFile": {
 					"scope": "resource",
 					"type": "array",
-					"description": "Please provide a source file which contains the variables."
+					"description": "Please provide the relative path of the source file containing the variables (according to the root directory)."
 				},
 				"languageServerReminder.trace.server": {
 					"scope": "window",
