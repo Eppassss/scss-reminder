@@ -1,3 +1,7 @@
+/**
+ * @file language server
+ * @author patrickli147
+ */
 
 import {
 	createConnection,
@@ -29,6 +33,13 @@ import {
 } from 'vscode-languageserver-textdocument';
 
 import loadVariables, {IVariableData} from './loadVariables';
+import initCapabilities from './init/initCapabilities';
+import init from './init/init';
+
+import {ClientCapabilityConfig} from './models/ClientCapabilityConfig/index';
+
+// constants
+import {CSS_REMINDER} from './constants/common';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -37,80 +48,31 @@ const connection = createConnection(ProposedFeatures.all);
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
-// const filePath = '/sass/_default.scss';
 const filePath = './test.scss';
-
-let hasConfigurationCapability = false;
-let hasWorkspaceFolderCapability = false;
-let hasDiagnosticRelatedInformationCapability = false;
-let hasCodeActionLiteralsCapability = false;
 
 // variables
 let cssVariables: Map<string, IVariableData> | null = null;
 let cssTextDocument: TextDocument;
+const clientCapabilityConfig = new ClientCapabilityConfig({});
 
 connection.onInitialize((params: InitializeParams) => {
-	const capabilities = params.capabilities;
-	console.log(params);
+	console.log(ClientCapabilityConfig);
+	const newConfig = initCapabilities(params);
+	clientCapabilityConfig.update(newConfig);
 
-	// load css variables
 	const res = loadVariables(filePath);
 	cssVariables = res.variables;
 	cssTextDocument = res.cssTextDocument;
 
-	// Does the client support the `workspace/configuration` request?
-	// If not, we fall back using global settings.
-	hasConfigurationCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.configuration
-	);
-	hasWorkspaceFolderCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.workspaceFolders
-	);
-	hasDiagnosticRelatedInformationCapability = !!(
-		capabilities.textDocument &&
-		capabilities.textDocument.publishDiagnostics &&
-		capabilities.textDocument.publishDiagnostics.relatedInformation
-	);
-	hasCodeActionLiteralsCapability = !!(
-		capabilities.textDocument &&
-		capabilities.textDocument.codeAction &&
-		capabilities.textDocument.codeAction.codeActionLiteralSupport
-	);
-
-	const result: InitializeResult = {
-		capabilities: {
-			textDocumentSync: TextDocumentSyncKind.Incremental,
-			// Tell the client that this server supports code completion.
-			completionProvider: {
-				resolveProvider: true
-			},
-			codeActionProvider: true,
-			executeCommandProvider: {
-				commands: []
-			}
-		}
-	};
-	if (hasCodeActionLiteralsCapability) {
-		result.capabilities.codeActionProvider = {
-			codeActionKinds: [CodeActionKind.QuickFix]
-		};
-	}
-	if (hasWorkspaceFolderCapability) {
-		result.capabilities.workspace = {
-			workspaceFolders: {
-				supported: true
-			}
-		};
-	}
-	return result;
+	return init(clientCapabilityConfig);
 });
 
 connection.onInitialized(() => {
-	if (hasConfigurationCapability) {
+	if (clientCapabilityConfig.hasConfigurationCapability) {
 		// Register for all configuration changes.
 		connection.client.register(DidChangeConfigurationNotification.type, undefined);
 	}
-	if (hasWorkspaceFolderCapability) {
+	if (clientCapabilityConfig.hasWorkspaceFolderCapability) {
 		connection.workspace.onDidChangeWorkspaceFolders(_event => {
 			connection.console.log('Workspace folder change event received.');
 		});
@@ -132,7 +94,7 @@ let globalSettings: ReminderSettings = defaultSettings;
 const documentSettings: Map<string, Thenable<ReminderSettings>> = new Map();
 
 connection.onDidChangeConfiguration(change => {
-	if (hasConfigurationCapability) {
+	if (clientCapabilityConfig.hasConfigurationCapability) {
 		// Reset all cached document settings
 		documentSettings.clear();
 	} else {
@@ -146,7 +108,7 @@ connection.onDidChangeConfiguration(change => {
 });
 
 function getDocumentSettings(resource: string): Thenable<ReminderSettings> {
-	if (!hasConfigurationCapability) {
+	if (!clientCapabilityConfig.hasConfigurationCapability) {
 		return Promise.resolve(globalSettings);
 	}
 	let result = documentSettings.get(resource);
@@ -209,38 +171,16 @@ async function validateTextDocument(textDocument: TextDocument) {
 				start: textDocument.positionAt(m.index + m[1].length),
 				end: textDocument.positionAt(m.index + m[0].length)
 			};
-			const codeAction = CodeAction.create(
-				'修复',
-				{
-					documentChanges: [
-						{
-							edits: [
-								{
-									range,
-									newText: variableName
-								}
-							],
-							textDocument
-						}
-					]
-				},
-				CodeActionKind.QuickFix
-			);
-			// const command = Command.create('replace', "testcommand");
-			// console.log(">>>>>>");
-			// console.log(codeAction);
+
 			const diagnostic: Diagnostic = {
 				severity: DiagnosticSeverity.Information,
 				range,
 				message: `'${m[2]}' is defined as '${variableName}'.`,
-				source: 'ex',
+				source: CSS_REMINDER.DIAGNOSTIC_IDENTIFIER,
 				data: variableName
 			};
-			const originalRange = {
-				start: cssTextDocument.positionAt(value.start),
-				end: cssTextDocument.positionAt(value.end)
-			};
-			if (hasDiagnosticRelatedInformationCapability) {
+
+			if (clientCapabilityConfig.hasDiagnosticRelatedInformationCapability) {
 				diagnostic.relatedInformation = [
 					{
 						location: {
@@ -324,8 +264,7 @@ connection.onCodeAction(
 			const {diagnostics} = context;
 			const codeActions: CodeAction[] = [];
 			diagnostics.forEach((diagnostic) => {
-				// TODO: maintain CONSTANTS
-				if (diagnostic.source === 'ex') {
+				if (diagnostic.source === CSS_REMINDER.DIAGNOSTIC_IDENTIFIER) {
 					const {range, data} = diagnostic;
 					codeActions.push(CodeAction.create(
 						data as string,
