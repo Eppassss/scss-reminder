@@ -12,14 +12,6 @@ let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
 
-	const myCmd = commands.registerCommand('replace-val', () => {
-		window.activeTextEditor.edit((mutator) => {
-			mutator.insert(new Position(1, 1), 'inserted');
-		});
-	});
-
-	context.subscriptions.push(myCmd);
-
 	// The server is implemented in node
 	const serverModule = context.asAbsolutePath(
 		path.join('server', 'out', 'server.js')
