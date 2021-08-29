@@ -181,6 +181,8 @@ async function validateTextDocument(textDocument: TextDocument) {
 	}
 	if (textDocument.uri === rootUri + cssTextDocument.uri) {
 		console.log(textDocument.uri);
+		const diagnostics: Diagnostic[] = [];
+		connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 		return;
 	}
 
