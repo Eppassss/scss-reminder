@@ -174,10 +174,14 @@ async function initReminder() {
 }
 
 async function validateTextDocument(textDocument: TextDocument) {
-	console.log("validates");
 	if (cssVariables.size === 0) {
-		initReminder();
+		await initReminder();
 	}
+	if (textDocument.uri === rootUri + cssTextDocument.uri) {
+		console.log(textDocument.uri);
+		return;
+	}
+
 	let problems = 0;
 	const diagnostics: Diagnostic[] = [];
 	const settings = await getDocumentSettings(textDocument.uri);
