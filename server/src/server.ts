@@ -62,6 +62,7 @@ connection.onInitialize(async (params: InitializeParams) => {
 	clientCapabilityConfig.update(newConfig);
 
 	rootUri = params.workspaceFolders && params.workspaceFolders[0].uri;
+	console.log(rootUri);
 
 	// const res = loadVariables(filePath);
 	// cssVariables = res.variables;
@@ -160,6 +161,8 @@ async function initReminder() {
 	if (sourceFile.length === 0) {
 		// TODO: provides
 		console.log("provide");
+		console.log(connection);
+		console.log(connection.window.showErrorMessage('Please provide source file in settings!'));
 		return;
 	}
 	const path = sourceFile[0];
@@ -167,6 +170,7 @@ async function initReminder() {
 	const res = loadVariables(path);
 	cssVariables = res.variables;
 	cssTextDocument = res.cssTextDocument;
+	connection.window.showDocument({uri: cssTextDocument.uri});
 }
 
 async function validateTextDocument(textDocument: TextDocument) {
@@ -204,7 +208,7 @@ async function validateTextDocument(textDocument: TextDocument) {
 				diagnostic.relatedInformation = [
 					{
 						location: {
-							uri: cssTextDocument.uri,
+							uri: rootUri + cssTextDocument.uri,
 							range: {
 								start: cssTextDocument.positionAt(value.start),
 								end: cssTextDocument.positionAt(value.end)

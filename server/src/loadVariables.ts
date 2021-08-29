@@ -17,7 +17,7 @@ export default (path: string) => {
 	// console.log(path);
 	// console.log(__dirname);
 	const text = fs.readFileSync(path, 'utf-8');
-	const cssTextDocument = TextDocument.create(path, "plaintext", 1, text);
+	const cssTextDocument = TextDocument.create(path.substr(1), "plaintext", 1, text);
 	const pattern = /(\$[\w-]+:)(\s)*([^;\n$]*)/g;
 	const variables: Map<string, IVariableData> = new Map();
 
