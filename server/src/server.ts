@@ -48,21 +48,24 @@ const connection = createConnection(ProposedFeatures.all);
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
-const filePath = './test.scss';
+let rootUri: string | null = '';
+// const filePath = './test.scss';
 
 // variables
-let cssVariables: Map<string, IVariableData> | null = null;
+let cssVariables: Map<string, IVariableData> = new Map();
 let cssTextDocument: TextDocument;
 const clientCapabilityConfig = new ClientCapabilityConfig({});
 
-connection.onInitialize((params: InitializeParams) => {
-	console.log(ClientCapabilityConfig);
+connection.onInitialize(async (params: InitializeParams) => {
+	console.log(params);
 	const newConfig = initCapabilities(params);
 	clientCapabilityConfig.update(newConfig);
 
-	const res = loadVariables(filePath);
-	cssVariables = res.variables;
-	cssTextDocument = res.cssTextDocument;
+	rootUri = params.workspaceFolders && params.workspaceFolders[0].uri;
+
+	// const res = loadVariables(filePath);
+	// cssVariables = res.variables;
+	// cssTextDocument = res.cssTextDocument;
 
 	return init(clientCapabilityConfig);
 });
@@ -82,12 +85,13 @@ connection.onInitialized(() => {
 // The Reminder settings
 interface ReminderSettings {
 	maxNumberOfProblems: number;
+	sourceFile: string[];
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this Reminder
 // but could happen with other clients.
-const defaultSettings: ReminderSettings = { maxNumberOfProblems: 1000 };
+const defaultSettings: ReminderSettings = { maxNumberOfProblems: 1000, sourceFile: ['./test.scss'] };
 let globalSettings: ReminderSettings = defaultSettings;
 
 // Cache the settings of all open documents
@@ -149,9 +153,26 @@ function makeValidRegExpFromString(s: string) {
 	return new RegExp(s, "g");
 }
 
-async function validateTextDocument(textDocument: TextDocument) {
-	if (!cssVariables) {
+async function initReminder() {
+	console.log('init reminder');
+	const settings = await getDocumentSettings(rootUri as string);
+	const {sourceFile} = settings;
+	if (sourceFile.length === 0) {
+		// TODO: provides
+		console.log("provide");
 		return;
+	}
+	const path = sourceFile[0];
+
+	const res = loadVariables(path);
+	cssVariables = res.variables;
+	cssTextDocument = res.cssTextDocument;
+}
+
+async function validateTextDocument(textDocument: TextDocument) {
+	console.log("validates");
+	if (cssVariables.size === 0) {
+		initReminder();
 	}
 	let problems = 0;
 	const diagnostics: Diagnostic[] = [];
@@ -160,7 +181,6 @@ async function validateTextDocument(textDocument: TextDocument) {
 
 	cssVariables.forEach((value, key) => {
 		const pattern = makeValidRegExpFromString(value.value);
-		// console.log(pattern);
 		const variableName = key.slice(0, -1);
 
 		let m: RegExpExecArray | null;
@@ -207,7 +227,6 @@ async function validateTextDocument(textDocument: TextDocument) {
 			diagnostics.push(diagnostic);
 		}
 	});
-	console.log(diagnostics.length);
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
 
@@ -254,11 +273,6 @@ connection.onCompletionResolve(
 
 connection.onCodeAction(
 	(params: CodeActionParams, ...rest): any => {
-		console.log('code action');
-		console.log(params);
-		console.log(rest);
-		console.log('code action ends');
-
 		if (params.context.diagnostics.length > 0) {
 			const {textDocument, context} = params;
 			const {diagnostics} = context;

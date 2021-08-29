@@ -23,13 +23,18 @@
 	"contributes": {
 		"configuration": {
 			"type": "object",
-			"title": "Reminder configuration",
+			"title": "SCSS-Reminder configuration",
 			"properties": {
 				"languageServerReminder.maxNumberOfProblems": {
 					"scope": "resource",
 					"type": "number",
-					"default": 100,
+					"default": 1000,
 					"description": "Controls the maximum number of problems produced by the server."
+				},
+				"languageServerReminder.sourceFile": {
+					"scope": "resource",
+					"type": "array",
+					"description": "Please provide a source file which contains the variables."
 				},
 				"languageServerReminder.trace.server": {
 					"scope": "window",
