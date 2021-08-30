@@ -57,16 +57,12 @@ let cssTextDocument: TextDocument;
 const clientCapabilityConfig = new ClientCapabilityConfig({});
 
 connection.onInitialize(async (params: InitializeParams) => {
-	console.log(params);
+	// console.log(params);
 	const newConfig = initCapabilities(params);
 	clientCapabilityConfig.update(newConfig);
 
 	rootUri = params.workspaceFolders && params.workspaceFolders[0].uri;
-	console.log(rootUri);
-
-	// const res = loadVariables(filePath);
-	// cssVariables = res.variables;
-	// cssTextDocument = res.cssTextDocument;
+	// console.log(rootUri);
 
 	return init(clientCapabilityConfig);
 });
@@ -135,8 +131,22 @@ documents.onDidClose(e => {
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change => {
+documents.onDidChangeContent(async (change) => {
+	if (cssVariables.size === 0) {
+		await initReminder();
+	}
 	validateTextDocument(change.document);
+});
+
+documents.onDidSave(async (e) => {
+	if (e.document.uri === rootUri + cssTextDocument.uri) {
+		console.log("save source file");
+		await initReminder();
+		console.log("init ends");
+		console.log(cssVariables);
+		documents.all().forEach(validateTextDocument);
+		return;
+	}
 });
 
 /**
@@ -172,15 +182,12 @@ async function initReminder() {
 	const res = loadVariables(path);
 	cssVariables = res.variables;
 	cssTextDocument = res.cssTextDocument;
-	connection.window.showDocument({uri: cssTextDocument.uri});
 }
 
 async function validateTextDocument(textDocument: TextDocument) {
-	if (cssVariables.size === 0) {
-		await initReminder();
-	}
+	console.log("validate");
 	if (textDocument.uri === rootUri + cssTextDocument.uri) {
-		console.log(textDocument.uri);
+		// console.log(textDocument.uri);
 		const diagnostics: Diagnostic[] = [];
 		connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 		return;
