@@ -4,8 +4,6 @@ import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
 
-// TODO:监听保存变量的文件的变化
-
 export interface IVariableData {
 	start: number;
 	end: number;
@@ -14,8 +12,6 @@ export interface IVariableData {
 }
 
 export default (path: string) => {
-	// console.log(path);
-	// console.log(__dirname);
 	const text = fs.readFileSync(path, 'utf-8');
 	const cssTextDocument = TextDocument.create(path.substr(1), "plaintext", 1, text);
 	const pattern = /(\$[\w-]+:)(\s)*([^;\n$]*)/g;
@@ -32,7 +28,6 @@ export default (path: string) => {
 			value: variableValue,
 			origin: matches[0]
 		};
-		// console.log(JSON.stringify(variableData));
 		variables.set(variableName, variableData);
 	}
 	return {variables, cssTextDocument};
