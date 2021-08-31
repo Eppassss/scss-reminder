@@ -16,7 +16,7 @@ This extension contributes the following settings:
 - `languageServerReminder.sourceFile`: source file containing variables
 
 You may select a file in your project as the source file.
-![select a file](https://github.com/patrickli147/demos/blob/main/scss-reminder/config.png?raw=true)
+![select a file](https://github.com/patrickli147/demos/blob/main/scss-reminder/selectModal.png?raw=true)
 
 Or manually edit ./vscode/settings.json(use relative path to your root directory).
 ![settings.json](https://github.com/patrickli147/demos/blob/main/scss-reminder/settings.png?raw=true)

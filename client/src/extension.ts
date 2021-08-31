@@ -2,6 +2,7 @@ import { resolveCliPathFromVSCodeExecutablePath } from '@vscode/test-electron';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { workspace, ExtensionContext, commands, window, Position } from 'vscode';
+import {messageItems} from './constants';
 
 import {
 	LanguageClient,
@@ -17,27 +18,21 @@ async function initSettings() {
 	const sourceFiles: string[] = vscode.workspace.getConfiguration().get('languageServerReminder.sourceFile');
 
 	if ((sourceFiles as string[]).length === 0) {
-		const quickPick = vscode.window.createQuickPick();
-		quickPick.activeItems = [];
-		quickPick.items = [{label: 'Select A File'}];
-		quickPick.ignoreFocusOut = true;
-		quickPick.placeholder = 'Please select a source file containing scss variables.';
-		quickPick.onDidChangeActive(async (e) => {
-			if (e.length > 0) {
-				quickPick.hide();
-				const res = await vscode.window.showOpenDialog();
-				const filePath = res[0].path;
-				const relativePath = vscode.workspace.asRelativePath(filePath);
-				sourceFiles.push('./' + relativePath);
-				await vscode.workspace.getConfiguration().update('languageServerReminder.sourceFile', sourceFiles);
-			}
-		});
-		quickPick.show();
+		const res = await vscode.window.showInformationMessage('Please select a source file containing scss variables.',
+			...[messageItems.OK, messageItems.Later]);
+
+		if (res === messageItems.OK) {
+			const res = await vscode.window.showOpenDialog();
+			const filePath = res[0].path;
+			const relativePath = vscode.workspace.asRelativePath(filePath);
+			sourceFiles.push('./' + relativePath);
+			await vscode.workspace.getConfiguration().update('languageServerReminder.sourceFile', sourceFiles);
+		}
 	}
 }
 
 export async function activate(context: ExtensionContext) {
-	// await vscode.workspace.getConfiguration().update('languageServerReminder.sourceFile', []);
+	await vscode.workspace.getConfiguration().update('languageServerReminder.sourceFile', []);
 	console.log("activate");
 	initSettings();
 
