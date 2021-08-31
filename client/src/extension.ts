@@ -32,7 +32,7 @@ async function initSettings() {
 }
 
 export async function activate(context: ExtensionContext) {
-	await vscode.workspace.getConfiguration().update('languageServerReminder.sourceFile', []);
+	// await vscode.workspace.getConfiguration().update('languageServerReminder.sourceFile', []);
 	console.log("activate");
 	initSettings();
 
