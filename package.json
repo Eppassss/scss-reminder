@@ -26,18 +26,18 @@
 			"type": "object",
 			"title": "SCSS-Reminder configuration",
 			"properties": {
-				"languageServerReminder.maxNumberOfProblems": {
+				"scssReminder.maxNumberOfProblems": {
 					"scope": "resource",
 					"type": "number",
 					"default": 1000,
 					"description": "Controls the maximum number of problems produced by the server."
 				},
-				"languageServerReminder.sourceFile": {
+				"scssReminder.sourceFile": {
 					"scope": "resource",
 					"type": "array",
-					"description": "Please provide the relative path of the source file containing the variables (according to the root directory)."
+					"description": "Controls the source files."
 				},
-				"languageServerReminder.trace.server": {
+				"scssReminder.trace.server": {
 					"scope": "window",
 					"type": "string",
 					"enum": [

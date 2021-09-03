@@ -25,7 +25,8 @@ import {
 	WorkspaceChange,
 	Position,
 	ExecuteCommandParams,
-	CodeActionKind
+	CodeActionKind,
+	ExecuteCommandRequest,
 } from 'vscode-languageserver/node';
 
 import {
@@ -100,7 +101,7 @@ connection.onDidChangeConfiguration(async (change) => {
 		documentSettings.clear();
 	} else {
 		globalSettings = <ReminderSettings>(
-			(change.settings.languageServerReminder || defaultSettings)
+			(change.settings.scssReminder || defaultSettings)
 		);
 	}
 
@@ -117,7 +118,7 @@ function getDocumentSettings(resource: string): Thenable<ReminderSettings> {
 	if (!result) {
 		result = connection.workspace.getConfiguration({
 			scopeUri: resource,
-			section: 'languageServerReminder'
+			section: 'scssReminder'
 		});
 		documentSettings.set(resource, result);
 	}

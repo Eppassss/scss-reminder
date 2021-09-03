@@ -13,7 +13,7 @@ You will be reminded of the property defined as a variable. In this example, var
 
 This extension contributes the following settings:
 
-- `languageServerReminder.sourceFile`: source file containing variables
+- `scssReminder.sourceFile`: source file containing variables
 
 You may select a file in your project as the source file.
 ![select a file](https://github.com/patrickli147/demos/blob/main/scss-reminder/selectModal.png?raw=true)
