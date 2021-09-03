@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { workspace, ExtensionContext, commands, window, Position } from 'vscode';
 import {messageItems} from './constants';
+import registerCommands from './registerCommands';
 
 import {
 	LanguageClient,
@@ -15,7 +16,7 @@ let client: LanguageClient;
 
 async function initSettings() {
 
-	const sourceFiles: string[] = vscode.workspace.getConfiguration().get('languageServerReminder.sourceFile');
+	const sourceFiles: string[] = vscode.workspace.getConfiguration().get('scssReminder.sourceFile');
 
 	if ((sourceFiles as string[]).length === 0) {
 		const res = await vscode.window.showInformationMessage('Please select a source file containing scss variables.',
@@ -26,15 +27,22 @@ async function initSettings() {
 			const filePath = res[0].path;
 			const relativePath = vscode.workspace.asRelativePath(filePath);
 			sourceFiles.push('./' + relativePath);
-			await vscode.workspace.getConfiguration().update('languageServerReminder.sourceFile', sourceFiles);
+			await vscode.workspace.getConfiguration().update('scssReminder.sourceFile', sourceFiles);
 		}
 	}
 }
 
 export async function activate(context: ExtensionContext) {
-	// await vscode.workspace.getConfiguration().update('languageServerReminder.sourceFile', []);
+	registerCommands();
+	await vscode.workspace.getConfiguration().update('scssReminder.sourceFile', []);
+	vscode.commands.executeCommand('scssReminder.setSourceFile');
 	console.log("activate");
-	initSettings();
+	// initSettings();
+
+	const cmds = await vscode.commands.getCommands(true);
+	console.log(cmds.filter(v => {
+		return v.includes('scssReminder');
+	}));
 
 	// The server is implemented in node
 	const serverModule = context.asAbsolutePath(
@@ -67,7 +75,7 @@ export async function activate(context: ExtensionContext) {
 
 	// Create the language client and start the client.
 	client = new LanguageClient(
-		'languageServerReminder',
+		'scssReminder',
 		'Language Server Reminder',
 		serverOptions,
 		clientOptions
