@@ -33,16 +33,16 @@ async function initSettings() {
 }
 
 export async function activate(context: ExtensionContext) {
-	registerCommands();
-	await vscode.workspace.getConfiguration().update('scssReminder.sourceFile', []);
+	await registerCommands();
+	// await vscode.workspace.getConfiguration().update('scssReminder.sourceFile', []);
 	vscode.commands.executeCommand('scssReminder.setSourceFile');
 	console.log("activate");
 	// initSettings();
 
-	const cmds = await vscode.commands.getCommands(true);
-	console.log(cmds.filter(v => {
-		return v.includes('scssReminder');
-	}));
+	// const cmds = await vscode.commands.getCommands(true);
+	// console.log(cmds.filter(v => {
+	// 	return v.includes('scssReminder');
+	// }));
 
 	// The server is implemented in node
 	const serverModule = context.asAbsolutePath(
