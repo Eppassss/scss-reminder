@@ -76,7 +76,7 @@ export async function activate(context: ExtensionContext) {
 	// Create the language client and start the client.
 	client = new LanguageClient(
 		'scssReminder',
-		'Language Server Reminder',
+		'SCSS Reminder',
 		serverOptions,
 		clientOptions
 	);
