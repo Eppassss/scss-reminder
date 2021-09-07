@@ -1,4 +1,3 @@
-import { resolveCliPathFromVSCodeExecutablePath } from '@vscode/test-electron';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { workspace, ExtensionContext, commands, window, Position } from 'vscode';
@@ -6,8 +5,10 @@ import {messageItems} from './constants';
 import registerCommands from './registerCommands';
 
 import {
+	ExecuteCommandRequest,
 	LanguageClient,
 	LanguageClientOptions,
+	ProtocolRequestType0,
 	ServerOptions,
 	TransportKind,
 } from 'vscode-languageclient/node';
@@ -37,6 +38,7 @@ export async function activate(context: ExtensionContext) {
 	// await vscode.workspace.getConfiguration().update('scssReminder.sourceFile', []);
 	vscode.commands.executeCommand('scssReminder.setSourceFile');
 	console.log("activate");
+	// vscode.commands.executeCommand('scssReminder.test');
 	// initSettings();
 
 	// const cmds = await vscode.commands.getCommands(true);
