@@ -27,6 +27,7 @@ import {
 	ExecuteCommandParams,
 	CodeActionKind,
 	ExecuteCommandRequest,
+	CodeActionRequest,
 } from 'vscode-languageserver/node';
 
 import {
@@ -261,18 +262,27 @@ connection.onCompletion(
 		// The pass parameter contains the position of the text document in
 		// which code complete got requested. For the Reminder we ignore this
 		// info and always provide the same completion items.
-		return [
-			{
-				label: 'TypeScript',
-				kind: CompletionItemKind.Text,
-				data: 1
-			},
-			{
-				label: 'JavaScript',
-				kind: CompletionItemKind.Text,
-				data: 2
-			}
-		];
+		const completions: CompletionItem[] = [];
+		console.log(_textDocumentPosition);
+		for (const [key, value] of cssVariables) {
+			console.log([key, value]);
+			// completion of keys
+			completions.push({
+				label: key.slice(0, -1),
+				kind: CompletionItemKind.Variable,
+				data: value.origin
+			});
+
+			// completion of values
+			completions.push({
+				label: `${key.slice(0, -1)}`,
+				kind: CompletionItemKind.Variable,
+				data: value.origin,
+				insertText: key.slice(0, -1),
+				filterText: value.value
+			});
+		}
+		return completions;
 	}
 );
 
@@ -280,13 +290,8 @@ connection.onCompletion(
 // the completion list.
 connection.onCompletionResolve(
 	(item: CompletionItem): CompletionItem => {
-		if (item.data === 1) {
-			item.detail = 'TypeScript details';
-			item.documentation = 'TypeScript documentation';
-		} else if (item.data === 2) {
-			item.detail = 'JavaScript details';
-			item.documentation = 'JavaScript documentation';
-		}
+		console.log(item);
+		item.detail = item.data;
 		return item;
 	}
 );
@@ -342,6 +347,11 @@ connection.onNotification(
 		console.log(params);
 	}
 );
+
+connection.onRequest('type', (...params) => {
+	console.log('====');
+	console.log(params);
+});
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
