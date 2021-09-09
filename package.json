@@ -4,7 +4,7 @@
 	"displayName": "SCSS Reminder",
 	"author": "patrickli147",
 	"license": "MIT",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/patrickli147/scss-reminder"
