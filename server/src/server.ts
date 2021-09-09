@@ -34,6 +34,8 @@ import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
 
+import {EServerRequest, EServerRequestMap} from './constants/serverRequests';
+
 import loadVariables, {IVariableData} from './loadVariables';
 import initCapabilities from './init/initCapabilities';
 import init from './init/init';
@@ -59,12 +61,10 @@ let cssTextDocument: TextDocument;
 const clientCapabilityConfig = new ClientCapabilityConfig({});
 
 connection.onInitialize(async (params: InitializeParams) => {
-	// console.log(params);
 	const newConfig = initCapabilities(params);
 	clientCapabilityConfig.update(newConfig);
 
 	rootUri = params.workspaceFolders && params.workspaceFolders[0].uri;
-	// console.log(rootUri);
 
 	return init(clientCapabilityConfig);
 });
@@ -142,10 +142,8 @@ documents.onDidChangeContent(async (change) => {
 
 documents.onDidSave(async (e) => {
 	if (e.document.uri === rootUri + cssTextDocument.uri) {
-		console.log("save source file");
+		// if the source file changes, initReminder again
 		await initReminder();
-		console.log("init ends");
-		console.log(cssVariables);
 		documents.all().forEach(validateTextDocument);
 		return;
 	}
@@ -168,15 +166,10 @@ function makeValidRegExpFromString(s: string) {
 }
 
 async function initReminder() {
-	console.log('init reminder');
 	const settings = await getDocumentSettings(rootUri as string);
 	const {sourceFile} = settings;
 	if (sourceFile.length === 0) {
-		// TODO: provides
-		console.log("provide");
-
-		console.log(connection);
-		console.log(connection.window.showErrorMessage('Please provide source file in settings!'));
+		connection.sendRequest(EServerRequestMap[EServerRequest.SET_SOURCE_FILE]);
 		return;
 	}
 	const path = sourceFile[0];
@@ -187,9 +180,7 @@ async function initReminder() {
 }
 
 async function validateTextDocument(textDocument: TextDocument) {
-	console.log("validate");
 	if (textDocument.uri === rootUri + cssTextDocument.uri) {
-		// console.log(textDocument.uri);
 		const diagnostics: Diagnostic[] = [];
 		connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 		return;
@@ -263,9 +254,7 @@ connection.onCompletion(
 		// which code complete got requested. For the Reminder we ignore this
 		// info and always provide the same completion items.
 		const completions: CompletionItem[] = [];
-		console.log(_textDocumentPosition);
 		for (const [key, value] of cssVariables) {
-			console.log([key, value]);
 			// completion of keys
 			completions.push({
 				label: key.slice(0, -1),
@@ -290,7 +279,6 @@ connection.onCompletion(
 // the completion list.
 connection.onCompletionResolve(
 	(item: CompletionItem): CompletionItem => {
-		console.log(item);
 		item.detail = item.data;
 		return item;
 	}
@@ -348,9 +336,10 @@ connection.onNotification(
 	}
 );
 
-connection.onRequest('type', (...params) => {
+connection.onRequest('test-request', (...params) => {
 	console.log('====');
 	console.log(params);
+	connection.sendRequest('server');
 });
 
 // Make the text document manager listen on the connection
