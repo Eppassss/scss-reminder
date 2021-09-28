@@ -1,8 +1,10 @@
 # scss reminder
 
+This is a vscode extension which reminds you of the defined css variables.
+
 ## Features
 
-- Remind of defined variables
+- Remind defined variables
 
 - Quick fix for replacement of defined variables
 
