@@ -37,8 +37,10 @@ import {
 import {EServerRequest, EServerRequestMap} from './constants/serverRequests';
 
 import loadVariables, {IVariableData} from './loadVariables';
+import loadMixins, {IMixinData} from './loadMixins';
 import initCapabilities from './init/initCapabilities';
 import init from './init/init';
+import {validateMixins, validateVariables} from './validate/validate';
 
 import {ClientCapabilityConfig} from './models/ClientCapabilityConfig/index';
 
@@ -57,7 +59,10 @@ let rootUri: string | null = '';
 
 // variables
 let cssVariables: Map<string, IVariableData> = new Map();
+let mixins: Map<string, IMixinData> = new Map();
 let cssTextDocument: TextDocument;
+const textDocuments: TextDocument[] = [];
+
 const clientCapabilityConfig = new ClientCapabilityConfig({});
 
 connection.onInitialize(async (params: InitializeParams) => {
@@ -84,13 +89,13 @@ connection.onInitialized(() => {
 // The Reminder settings
 interface ReminderSettings {
 	maxNumberOfProblems: number;
-	sourceFile: string[];
+	sourceFiles: string[];
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this Reminder
 // but could happen with other clients.
-const defaultSettings: ReminderSettings = { maxNumberOfProblems: 1000, sourceFile: ['./test.scss'] };
+const defaultSettings: ReminderSettings = { maxNumberOfProblems: 1000, sourceFiles: ['./test.scss'] };
 let globalSettings: ReminderSettings = defaultSettings;
 
 // Cache the settings of all open documents
@@ -149,34 +154,27 @@ documents.onDidSave(async (e) => {
 	}
 });
 
-/**
- * create a RegExp to match css values
- * @param s given string
- * @returns regular expression
- */
-function makeValidRegExpFromString(s: string) {
-	const reg = /[\^$.*+?|\\/[\]{}()]/g;
-	s = s.replace(reg, (match: string): string => {
-		return `\\${match}`;
-	});
-
-	s = '(:\\s*)(' + s + ')';
-
-	return new RegExp(s, "g");
-}
-
 async function initReminder() {
-	const settings = await getDocumentSettings(rootUri as string);
-	const {sourceFile} = settings;
-	if (sourceFile.length === 0) {
-		connection.sendRequest(EServerRequestMap[EServerRequest.SET_SOURCE_FILE]);
-		return;
-	}
-	const path = sourceFile[0];
+	const sourceFiles = await getSourceFiles() as any;
+	const path = sourceFiles[0];
+	console.log(path);
 
 	const res = loadVariables(path);
+	const mixinsRes = loadMixins('./mixins.scss');
+
 	cssVariables = res.variables;
 	cssTextDocument = res.cssTextDocument;
+	mixins = mixinsRes.mixins;
+}
+
+async function getSourceFiles() {
+	const settings = await getDocumentSettings(rootUri as string);
+	const {sourceFiles} = settings;
+	if (sourceFiles.length === 0) {
+		connection.sendRequest(EServerRequestMap[EServerRequest.SET_SOURCE_FILE]);
+	}
+
+	return sourceFiles;
 }
 
 async function validateTextDocument(textDocument: TextDocument) {
@@ -186,59 +184,24 @@ async function validateTextDocument(textDocument: TextDocument) {
 		return;
 	}
 
-	let problems = 0;
+	const problems = 0;
 	const diagnostics: Diagnostic[] = [];
 	const settings = await getDocumentSettings(textDocument.uri);
+	const maxNumberOfProblems = settings.maxNumberOfProblems;
 	const text = textDocument.getText();
 
-	cssVariables.forEach((value, key) => {
-		const pattern = makeValidRegExpFromString(value.value);
-		const variableName = key.slice(0, -1);
+	const commonValidateConfig = {
+		hasDiagnosticRelatedInformationCapability: clientCapabilityConfig.hasDiagnosticRelatedInformationCapability,
+		rootUri: rootUri as string
+	};
 
-		let m: RegExpExecArray | null;
+	const variableDiagnostics = validateVariables(cssVariables, text,
+		textDocument, maxNumberOfProblems - problems, commonValidateConfig);
+	const mixinDiagnostics = validateMixins(mixins, text,
+		textDocument, maxNumberOfProblems - problems, commonValidateConfig);
 
-		while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
-			problems++;
-			const range = {
-				start: textDocument.positionAt(m.index + m[1].length),
-				end: textDocument.positionAt(m.index + m[0].length)
-			};
+	diagnostics.push(...variableDiagnostics, ...mixinDiagnostics);
 
-			const diagnostic: Diagnostic = {
-				severity: DiagnosticSeverity.Information,
-				range,
-				message: `'${m[2]}' is defined as '${variableName}'.`,
-				source: CSS_REMINDER.DIAGNOSTIC_IDENTIFIER,
-				data: variableName
-			};
-
-			if (clientCapabilityConfig.hasDiagnosticRelatedInformationCapability) {
-				diagnostic.relatedInformation = [
-					{
-						location: {
-							uri: rootUri + cssTextDocument.uri,
-							range: {
-								start: cssTextDocument.positionAt(value.start),
-								end: cssTextDocument.positionAt(value.end)
-							}
-						},
-						message: value.origin
-					},
-					{
-						location: {
-							uri: textDocument.uri,
-							range: {
-								start: textDocument.positionAt(m.index),
-								end: textDocument.positionAt(m.index + m[0].length)
-							}
-						},
-						message: `'${m[2]}' is defined as '${variableName}'.`
-					}
-				];
-			}
-			diagnostics.push(diagnostic);
-		}
-	});
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
 
