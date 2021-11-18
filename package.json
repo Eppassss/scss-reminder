@@ -32,7 +32,7 @@
 					"default": 1000,
 					"description": "Controls the maximum number of problems produced by the server."
 				},
-				"scssReminder.sourceFile": {
+				"scssReminder.sourceFiles": {
 					"scope": "resource",
 					"type": "array",
 					"description": "Controls the source files."

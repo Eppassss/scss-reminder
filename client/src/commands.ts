@@ -1,4 +1,4 @@
-import setSourceFile from './actions/setSourceFiles';
+import setSourceFiles from './actions/setSourceFiles';
 import test from './actions/test';
 
 type CommandConfig = {
@@ -6,6 +6,6 @@ type CommandConfig = {
 };
 
 export const commandConfigs: CommandConfig = {
-	'scssReminder.setSourceFile': setSourceFile,
+	'scssReminder.setSourceFiles': setSourceFiles,
 	'scssReminder.test': test
 };

@@ -4,7 +4,7 @@ import {messageItems} from '../constants';
 
 export default async () => {
 	console.log('set source file');
-	const sourceFiles: string[] = await getConfiguration('scssReminder.sourceFile');
+	const sourceFiles: string[] = await getConfiguration('scssReminder.sourceFiles');
 
 	if ((sourceFiles as string[]).length === 0) {
 		const res = await vscode.window.showInformationMessage('Please select a source file containing scss variables.',
@@ -15,7 +15,7 @@ export default async () => {
 			const filePath = res[0].path;
 			const relativePath = vscode.workspace.asRelativePath(filePath);
 			sourceFiles.push('./' + relativePath);
-			await vscode.workspace.getConfiguration().update('scssReminder.sourceFile', sourceFiles);
+			await vscode.workspace.getConfiguration().update('scssReminder.sourceFiles', sourceFiles);
 		}
 	}
 };
