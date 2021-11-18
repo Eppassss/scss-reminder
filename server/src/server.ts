@@ -156,6 +156,7 @@ documents.onDidSave(async (e) => {
 
 async function initReminder() {
 	const sourceFiles = await getSourceFiles() as any;
+	// TODO: multi source
 	const path = sourceFiles[0];
 	console.log(path);
 
@@ -234,6 +235,23 @@ connection.onCompletion(
 				filterText: value.value
 			});
 		}
+
+		for (const [key, value] of mixins) {
+			// completion of mixin names
+			completions.push({
+				label: `@include ${key}`,
+				kind: CompletionItemKind.Text,
+				data: `@include ${key};`
+			});
+
+			// completion of mixin content
+			completions.push({
+				label: value.fullContent,
+				kind: CompletionItemKind.Text,
+				insertText: `@include ${key};`
+			});
+		}
+
 		return completions;
 	}
 );
