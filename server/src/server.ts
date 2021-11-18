@@ -160,7 +160,7 @@ async function initReminder() {
 	console.log(path);
 
 	const res = loadVariables(path);
-	const mixinsRes = loadMixins('./mixins.scss');
+	const mixinsRes = loadMixins(path);
 
 	cssVariables = res.variables;
 	cssTextDocument = res.cssTextDocument;
