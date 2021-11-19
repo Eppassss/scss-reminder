@@ -1,8 +1,9 @@
 {
 	"name": "scss-reminder",
-	"description": "A language server Reminder",
+	"description": "A Scss VSCode Extension",
 	"displayName": "SCSS Reminder",
 	"author": "patrickli147",
+	"icon": "images/logo.png",
 	"license": "MIT",
 	"version": "1.2.1",
 	"repository": {
