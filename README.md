@@ -1,29 +1,48 @@
-# scss reminder
+# Scss Reminder
 
-This is a vscode extension which reminds you of the defined css variables.
+This is a vscode extension which helps you of using scss/sass variables & mixins.
+
+---
 
 ## Features
 
-- Remind defined variables
+- Remind defined variables/mixins
 
-- Quick fix for replacement of defined variables
+- Quick fix for replacement of defined variables/mixins
 
-- Auto Completion
+- Auto Completion of variables/mixins
 
 - Support scss/sass syntax
 
-### quick fix demo
+---
 
-You will be reminded of the property defined as a variable. In this example, variables are defined in test.scss. You may click and go to the source file(test.scss) to check out the defined variable, or replace the property with the variable name just using quick fix.
+## Demos
+
+You will be reminded of the defined variables/mixins.
+
+---
+
+### reminder and quick-fix demo
+
+- In this example, variables are defined in test.scss. You may click and go to the source file(test.scss) to check out the defined variable, or replace the property with the variable name just using quick fix.
 ![Demo](https://github.com/patrickli147/demos/blob/main/scss-reminder/scss-reminder.gif?raw=true)
+
+- Demo for mixins
+![Mixin](https://github.com/patrickli147/demos/blob/main/scss-reminder/mixin_quickfix.gif?raw=true)
 
 ### auto completion demo
 
-*completion of css variable values*
+- *completion for variable value*
 ![auto completion demo](https://github.com/patrickli147/demos/blob/main/scss-reminder/completion-value.gif?raw=true)
 
-*completion of css variable names*
+- *completion for variable name*
 ![auto completion demo](https://github.com/patrickli147/demos/blob/main/scss-reminder/completion-variable.gif?raw=true)
+
+- *completion for mixin name*
+![auto completion demo](https://github.com/patrickli147/demos/blob/main/scss-reminder/mixin_name.gif?raw=true)
+
+- *completion for mixin content*
+![auto completion demo](https://github.com/patrickli147/demos/blob/main/scss-reminder/mixin_content.gif?raw=true)
 
 ## Extension Settings
 
