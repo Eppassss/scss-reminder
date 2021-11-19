@@ -54,8 +54,6 @@ export function validateMixins(
 		let m: RegExpExecArray | null;
 
 		while ((m = pattern.exec(text)) && problems < maxNumberOfProblems) {
-			console.log('.... match');
-			console.log(m);
 			problems++;
 			const range = {
 				start: textDocument.positionAt(m.index),
