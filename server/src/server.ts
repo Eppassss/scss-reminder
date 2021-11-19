@@ -241,14 +241,15 @@ connection.onCompletion(
 			completions.push({
 				label: `@include ${key}`,
 				kind: CompletionItemKind.Text,
-				data: `@include ${key};`
+				documentation: value.fullContent
 			});
 
 			// completion of mixin content
 			completions.push({
 				label: value.fullContent,
 				kind: CompletionItemKind.Text,
-				insertText: `@include ${key};`
+				documentation: value.fullContent,
+				insertText: `@include ${key}`
 			});
 		}
 
