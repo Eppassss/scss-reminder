@@ -50,7 +50,13 @@
 					"description": "Traces the communication between VS Code and the language server."
 				}
 			}
-		}
+		},
+		"commands": [
+			{
+				"command": "scssReminder.addSourceFile",
+				"title": "Add file"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

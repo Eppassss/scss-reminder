@@ -22,7 +22,6 @@ export async function activate(context: ExtensionContext) {
 	// test
 	// await vscode.workspace.getConfiguration().update('scssReminder.sourceFile', []);
 
-	vscode.commands.executeCommand('scssReminder.setSourceFiles');
 	console.log("activate");
 
 	// The server is implemented in node

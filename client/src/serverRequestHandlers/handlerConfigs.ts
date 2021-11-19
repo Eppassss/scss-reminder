@@ -4,7 +4,7 @@
  */
 
 // handlers
-import setSourceFiles from '../actions/setSourceFiles';
+import {setSourceFiles} from '../actions/setSourceFiles';
 
 export type ServerRequestHandler = () => void;
 
