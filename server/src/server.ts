@@ -42,6 +42,9 @@ import initCapabilities from './init/initCapabilities';
 import init from './init/init';
 import {validateMixins, validateVariables} from './validate/validate';
 
+// utils
+import {isItemInArray} from './utils/util';
+
 import {ClientCapabilityConfig} from './models/ClientCapabilityConfig/index';
 
 // constants
@@ -55,12 +58,10 @@ const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
 let rootUri: string | null = '';
-// const filePath = './test.scss';
 
 // variables
-let cssVariables: Map<string, IVariableData> = new Map();
-let mixins: Map<string, IMixinData> = new Map();
-let cssTextDocument: TextDocument;
+const cssVariables: Map<string, IVariableData> = new Map();
+const mixins: Map<string, IMixinData> = new Map();
 const textDocuments: TextDocument[] = [];
 
 const clientCapabilityConfig = new ClientCapabilityConfig({});
@@ -146,26 +147,35 @@ documents.onDidChangeContent(async (change) => {
 });
 
 documents.onDidSave(async (e) => {
-	if (e.document.uri === rootUri + cssTextDocument.uri) {
-		// if the source file changes, initReminder again
+	// uri of currently save file
+	const uriOfSavedFile = e.document.uri;
+	// add rootUri to each
+	const formattedArray = textDocuments.map(item => `${rootUri}${item.uri}`);
+
+	if (isItemInArray(uriOfSavedFile, formattedArray)) {
+		// if one of the source file changes, initReminder again
 		await initReminder();
 		documents.all().forEach(validateTextDocument);
-		return;
 	}
 });
 
 async function initReminder() {
 	const sourceFiles = await getSourceFiles() as any;
-	// TODO: multi source
-	const path = sourceFiles[0];
-	console.log(path);
 
-	const res = loadVariables(path);
-	const mixinsRes = loadMixins(path);
+	sourceFiles.forEach((sourceFilePath: string) => {
+		const res = loadVariables(sourceFilePath);
+		const mixinsRes = loadMixins(sourceFilePath);
 
-	cssVariables = res.variables;
-	cssTextDocument = res.cssTextDocument;
-	mixins = mixinsRes.mixins;
+		textDocuments.push(res.cssTextDocument, mixinsRes.textDocument);
+
+		res.variables.forEach((value, key) => {
+			cssVariables.set(key, value);
+		});
+
+		mixinsRes.mixins.forEach((value, key) => {
+			mixins.set(key, value);
+		});
+	});
 }
 
 async function getSourceFiles() {
@@ -179,7 +189,10 @@ async function getSourceFiles() {
 }
 
 async function validateTextDocument(textDocument: TextDocument) {
-	if (textDocument.uri === rootUri + cssTextDocument.uri) {
+	// add rootUri to each
+	const formattedArray = textDocuments.map(item => `${rootUri}${item.uri}`);
+	if (isItemInArray(textDocument.uri, formattedArray)) {
+		// no diagnostics in source files
 		const diagnostics: Diagnostic[] = [];
 		connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 		return;
