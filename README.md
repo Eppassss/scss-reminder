@@ -30,6 +30,8 @@ You will be reminded of the defined variables/mixins.
 - Demo for mixins
 ![Mixin](https://github.com/patrickli147/demos/blob/main/scss-reminder/mixin_quickfix.gif?raw=true)
 
+---
+
 ### auto completion demo
 
 - *completion for variable value*
@@ -44,11 +46,16 @@ You will be reminded of the defined variables/mixins.
 - *completion for mixin content*
 ![auto completion demo](https://github.com/patrickli147/demos/blob/main/scss-reminder/mixin_content.gif?raw=true)
 
+---
+
 ## Extension Settings
 
 This extension contributes the following settings:
 
 - `scssReminder.sourceFiles`: source file containing variables
+
+You may use 'Add file' command to add a source file.
+![add file](https://github.com/patrickli147/demos/blob/main/scss-reminder/add_file.gif?raw=true)
 
 You may select a file in your project as the source file.
 ![select a file](https://github.com/patrickli147/demos/blob/main/scss-reminder/selectModal.png?raw=true)
