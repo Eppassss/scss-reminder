@@ -13,7 +13,7 @@
 	"publisher": "patrickli147",
 	"categories": [],
 	"keywords": [
-		"scss css reminder variables"
+		"scss sass reminder variable mixin autocomplete quickfix"
 	],
 	"engines": {
 		"vscode": "^1.43.0"
