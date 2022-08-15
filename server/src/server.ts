@@ -163,18 +163,24 @@ async function initReminder() {
 	const sourceFiles = await getSourceFiles() as any;
 
 	sourceFiles.forEach((sourceFilePath: string) => {
-		const res = loadVariables(sourceFilePath);
-		const mixinsRes = loadMixins(sourceFilePath);
+		try {
+			const res = loadVariables(sourceFilePath);
+			const mixinsRes = loadMixins(sourceFilePath);
 
-		textDocuments.push(res.cssTextDocument, mixinsRes.textDocument);
+			textDocuments.push(res.cssTextDocument, mixinsRes.textDocument);
 
-		res.variables.forEach((value, key) => {
-			cssVariables.set(key, value);
-		});
+			res.variables.forEach((value, key) => {
+				cssVariables.set(key, value);
+			});
 
-		mixinsRes.mixins.forEach((value, key) => {
-			mixins.set(key, value);
-		});
+			mixinsRes.mixins.forEach((value, key) => {
+				mixins.set(key, value);
+			});
+		} catch (error) {
+			connection.sendRequest(EServerRequestMap[EServerRequest.SHOW_INFO_MSG], {
+				msg: (error as Error).message
+			});
+		}
 	});
 }
 

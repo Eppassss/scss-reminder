@@ -4,9 +4,9 @@
  */
 
 // handlers
-import {setSourceFiles} from '../actions/setSourceFiles';
+import {setSourceFiles, showErrorMessage} from '../actions';
 
-export type ServerRequestHandler = () => void;
+export type ServerRequestHandler = (...args: any) => void;
 
 export type handlerConfig = {
 	/**
@@ -23,6 +23,10 @@ export const handlerConfigs: handlerConfig[] = [
 	{
 		method: 'server-set-source-file',
 		handler: setSourceFiles
+	},
+	{
+		method: 'server-invoke-show-error-msg',
+		handler: showErrorMessage
 	}
 ];
 

@@ -32,7 +32,7 @@ export interface IVariableData {
 
 export default (path: string) => {
 	const text = fs.readFileSync(path, 'utf-8');
-	const cssTextDocument = TextDocument.create(path.substr(1), "plaintext", 1, text);
+	const cssTextDocument = TextDocument.create(path.substring(1), "plaintext", 1, text);
 	const variables: Map<string, IVariableData> = new Map();
 
 	let matches: RegExpExecArray | null;
