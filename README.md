@@ -40,7 +40,7 @@ You will be reminded of the defined variables/mixins.
 - *completion for variable name*
 ![auto completion demo](https://github.com/patrickli147/demos/blob/main/scss-reminder/completion-variable.gif?raw=true)
 
-- *completion for mixin name*
+- *completion for mixin names*
 ![auto completion demo](https://github.com/patrickli147/demos/blob/main/scss-reminder/mixin_name.gif?raw=true)
 
 - *completion for mixin content*
